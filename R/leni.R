@@ -1,6 +1,7 @@
 leni <- function(
     model = NULL,
     target_fx = "quadratic",
+    theta = c("a0","ax","ay"),
     bootstrap = FALSE,
     model.class = "lme",
     data = NULL
@@ -21,7 +22,7 @@ leni <- function(
 
   # Extract Raw Data for Bootstrap
   if(is.numeric(bootstrap) & bootstrap > 0){
-
+    dat <- NULL
   }
 
   # Try to automatically parse target function
@@ -43,11 +44,11 @@ leni <- function(
 
   # Identify Model Type - old
   fixed_effects <- leni_fixed_effects(model = model,
-                                      class = model.class,
+                                      model.class = model.class,
                                       ...)
   if(!is.null(modx)){
     cond_effects <- leni_conditional_effects(model = model,
-                                             class = model.class,
+                                             model.class = model.class,
                                              moderator = modx,
                                              ...)
   }
