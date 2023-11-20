@@ -30,12 +30,6 @@ leni_fixed_effects <- function(
   } else if(model.class == "lme"){
     lme4::fixef
   }
-  # invisible(
-  #   mapply(assign,
-  #          paste0("b",0:(length(read.coefs(model)-1))),
-  #          read.coefs(model),
-  #          MoreArgs = list(envir = parent.frame()))
-  # )
 
   # Run bootstrap
   if(is.numeric(bootstrap) & bootstrap > 0){
@@ -47,12 +41,24 @@ leni_fixed_effects <- function(
       R = bootstrap,
       model.obj = model)
   } else {
+    invisible(
+      mapply(assign,
+             paste0("b",0:(length(read.coefs(model))-1)),
+             read.coefs(model),
+             MoreArgs = list(envir = parent.frame()))
+    )
     nl_theta <- sapply(expr, eval)
     point_estimates <- setNames(nl_theta,
                                 substr(names(nl_theta),
                                        3,
                                        nchar(names(nl_theta))))
-    J <- matrix(c(sapply(theta)))
+    J <- matrix(c(
+      sapply(expr, function(x){
+        sapply(paste0("b",0:(length(read.coefs(model))-1)),
+               function(y){eval(D(x,y))})})
+      ), nrow = length(read.coefs(model)), ncol = length(read.coefs(model)),
+      byrow = FALSE)
+    ACOV_theta <- t(J) %*% vcov(model) %*% J
 
   }
 }
@@ -84,7 +90,7 @@ lm_fixed_effects_bootstrap <- function(data, indices, model.obj){
   fit <- eval(boostrapCall(getCall(model.obj)))
   invisible(
     mapply(assign,
-         paste0("b",0:(length(read.coefs(fit)-1))),
+         paste0("b",0:(length(read.coefs(fit))-1)),
          read.coefs(fit),
          MoreArgs = list(envir = parent.frame()))
   )
@@ -97,7 +103,7 @@ lme_fixed_effects_bootstrap <- function(data, indices, model.obj){
   fit <- eval(boostrapCall(getCall(model.obj)))
   invisible(
     mapply(assign,
-           paste0("b",0:(length(read.coefs(fit)-1))),
+           paste0("b",0:(length(read.coefs(fit))-1)),
            read.coefs(fit),
            MoreArgs = list(envir = parent.frame()))
   )
