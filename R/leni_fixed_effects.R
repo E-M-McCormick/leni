@@ -3,9 +3,11 @@ leni_fixed_effects <- function(
     target_fx = "quadratic",
     theta = c("a0","ax","ay"),
     bootstrap = FALSE,
+    bootSeed = NULL,
     model.class = "lme",
     data = NULL,
     coef.idx = NULL,
+    ci = 0.95,
     ...
 ){
 
@@ -28,98 +30,104 @@ leni_fixed_effects <- function(
     )
   }
   expr <- expr[paste0("f_", tolower(theta))]
-
-  # Save Out Relevant Parameter Estimates
-  read.coefs <- if(model.class == "lm"){
-    stats::coef
-  } else if(model.class == "lme"){
-    lme4::fixef
+  if (model.class == "lm"){
+    crit.val <- NULL                              # FIX ME
+  } else if (model.class == "lme"){
+    crit.val <- qt((1 - ci) / 2,
+                   df = length(unique(leni_realdata@flist[[1]])),
+                   lower.tail = FALSE)
   }
 
-  # Run bootstrap
+  # Run Bootstrap or Analytic Transformations
   if(is.numeric(bootstrap) & bootstrap > 0){
     if(!is.null(bootSeed)){set.seed(bootSeed)}
     bootResults <- boot::boot(
       data = if (model.class == "lm"){
-               data
-             } else {
-               data |> dplyr::group_nest(names(model@flist))
-             },
-      statistic = if (model.class == "lm"){
-                    lm_fixed_effects_bootstrap
-                  } else {
-                    lme_fixed_effects_bootstrap
-                  },
+          data
+        } else {
+          data |> dplyr::group_nest(model@flist[[1]])
+        },
+      statistic = fixed_effects_bootstrap,
       R = bootstrap,
       model = model,
+      model.class = model.class,
+      target_fx = target_fx,
+      expr = expr,
+      coef.idx = coef.idx,
       ...)
 
     return(
       list(
-        fixed_effects = bootResults$t0,
-        fixed_effects_se = apply(bootResults$t,
-                                 2,
-                                 function(x) sd(x, na.rm = TRUE)),
-        fixed_effects_robust = apply(bootResults$t,
-                                     2,
-                                     function(x)
-                                       bayestestR::map_estimate(
-                                         na.omit(x))
-                                     ),
-        fixed_effects_se_robust = apply(bootResults$t,
-                                        2,
-                                        function(x) IQR(x, na.rm = TRUE)),
+        fixed_effects = data.frame(
+          row.names = theta,
+          est = bootResults$t0,
+          se = apply(bootResults$t, 2, function(x) sd(x, na.rm = TRUE)),
+          ci.lower = tryCatch(
+            expr = {sapply(1:ncol(bootResults$t),function(x){boot::boot.ci(bootResults, type = "bca", index = x)$bca[4]})},
+            error = function(e){bootResults$t0 - crit.val*apply(bootResults$t, 2, function(x) sd(x, na.rm = TRUE))}
+          ),
+          ci.upper = tryCatch(
+            expr = {sapply(1:ncol(bootResults$t),function(x){boot::boot.ci(bootResults, type = "bca", index = x)$bca[5]})},
+            error = function(e){bootResults$t0 + crit.val*apply(bootResults$t, 2, function(x) sd(x, na.rm = TRUE))}
+          ),
+          est.robust = apply(bootResults$t, 2, function(x){
+            if (sd(x, na.rm = TRUE) > 0) bayestestR::map_estimate(na.omit(x))
+            else mean(x, na.rm = TRUE)
+          }),
+          se.robust = apply(bootResults$t, 2, function(x) IQR(x, na.rm = TRUE))
+        ),
         bootstrap_samples = bootResults
       )
     )
   } else {
     if (grepl(target_fx, "quadratic")){
-      c(b0,b1,b2) %tin% read.coefs(model)[1:3]
+      c(b0,b1,b2) %tin% read.coefs(model)[coef.idx]
     } else if (grepl(target_fx, "cubic")){
-      c(b0,b1,b2,b3) %tin% read.coefs(model)[1:4]
+      c(b0,b1,b2,b3) %tin% read.coefs(model)[coef.idx]
     }
     nl_theta <- sapply(expr, eval, envir = environment())
 
     J <- matrix(c(
       sapply(expr, function(x){
-        sapply(paste0("b",0:(length(read.coefs(model))-1)),
+        sapply(paste0("b",0:(length(read.coefs(model)[coef.idx])-1)),
                function(y){eval(D(x,y))})})
-      ), nrow = length(read.coefs(model)), ncol = length(read.coefs(model)),
+      ),
+      nrow = length(read.coefs(model)[coef.idx]),
+      ncol = length(read.coefs(model)[coef.idx]),
       byrow = FALSE)
 
     return(
       list(
-        fixed_effects = setNames(nl_theta,
-                                 substr(names(nl_theta),
-                                        3,
-                                        nchar(names(nl_theta)))),
-        fixed_effects_se = sqrt(diag(t(J) %*% vcov(model) %*% J)),
-        ACOV_theta = t(J) %*% vcov(model) %*% J
+        fixed_effects = data.frame(
+          row.names = theta,
+          est = nl_theta,
+          se = sqrt(diag(t(J) %*% vcov(model)[coef.idx,coef.idx] %*% J)),
+          ci.lower = nl_theta -
+            crit.val*sqrt(diag(t(J) %*% vcov(model)[coef.idx,coef.idx] %*% J)),
+          ci.upper = nl_theta +
+            crit.val*sqrt(diag(t(J) %*% vcov(model)[coef.idx,coef.idx] %*% J))
+        ),
+        ACOV_theta = structure(
+          as.matrix(t(J) %*% vcov(model)[coef.idx,coef.idx] %*% J),
+          dimnames = list(substr(names(nl_theta), 3, nchar(names(nl_theta))),
+                          substr(names(nl_theta), 3, nchar(names(nl_theta))))
+        )
       )
     )
   }
 }
 
 
-lm_fixed_effects_bootstrap <- function(data, indices, model, ...){
-  d <- data[indices,]
-  fit <- update(model, data = d)
+fixed_effects_bootstrap <- function(data, indices, model,
+                                    model.class, target_fx, expr, coef.idx){
+  if (model.class == "lm"){
+    fit <- update(model, data = data[indices,])
+  } else if (model.class == "lme"){
+    fit <- update(model, data = data[indices,] |> tidyr::unnest(cols = c(data)))
+  }
 
-  c(b0,b1,b2) %tin% read.coefs(fit)[1:3]
-  if(grepl(target_fx, "cubic")){b3 <- read.coefs(fit)[4]}
-
-  nl_theta <- sapply(expr, eval, envir = environment())
-  return(
-    setNames(nl_theta, substr(names(nl_theta), 3, nchar(names(nl_theta))))
-  )
-}
-
-lme_fixed_effects_bootstrap <- function(data, indices, model, ...){
-  d <- data[indices,]
-  fit <- update(model, data = d |> tidyr::unnest(cols=c(data)))
-
-  c(b0,b1,b2) %tin% read.coefs(fit)[1:3]
-  if(grepl(target_fx, "cubic")){b3 <- read.coefs(fit)[4]}
+  c(b0,b1,b2) %tin% read.coefs(fit)[coef.idx]
+  if(grepl(target_fx, "cubic")){b3 <- read.coefs(fit)[coef.idx[4]]}
 
   nl_theta <- sapply(expr, eval, envir = environment())
   return(
