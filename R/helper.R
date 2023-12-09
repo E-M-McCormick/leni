@@ -76,6 +76,7 @@ nonlinear_function_library <- function(target_fx = NULL, theta = NULL,
     tidymessage('Please considering citing the following:')
     tidymessage(citations[["Mcc_2023"]])
 
+
   ## Multiphase Functions
   } else if(grepl(target_fx, "cubic_multiphase") |
             grepl(target_fx, "cubic_multiphase_h")){
@@ -104,6 +105,7 @@ nonlinear_function_library <- function(target_fx = NULL, theta = NULL,
     theta <- c("xN","yN","d","betaN")
     tidymessage('Please considering citing the following:')
     tidymessage(citations[["Mcc_2023"]])
+
 
   ## Logistic Functions
   } else if(grepl(target_fx, "1PL")){

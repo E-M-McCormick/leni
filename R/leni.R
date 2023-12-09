@@ -1,10 +1,14 @@
+target_fx = "cubic"; theta = c("xN","yN","d","h"); bootstrap = TRUE; model.class = "lm"; data = NULL
 leni <- function(
     model = NULL,
     target_fx = "quadratic",
     theta = c("a0","ax","ay"),
     bootstrap = FALSE,
     model.class = "lme",
-    data = NULL
+    data = NULL,
+    coef.idx = NULL,
+    modx.idx = NULL,
+    ...
 ){
 
   # Default Arguments
@@ -22,7 +26,14 @@ leni <- function(
 
   # Extract Raw Data for Bootstrap
   if(is.numeric(bootstrap) & bootstrap > 0){
-    dat <- NULL
+    if(grepl(model.class, "lm")){data <- model$model}
+    if(class(model) %in% c("lmerMod","lmerModLmerTest")){data <- model@frame}
+    if(class(model) %in% c("nlme","lme")){data <- nlme::getData(model)}
+  }
+  if(is.null(data)){
+    bootstrap <- FALSE
+    tidymessage("The raw data is required to obtain bootstrap results.
+                 Defaulting to analytic standard errors.")
   }
 
   # Try to automatically parse target function
@@ -41,8 +52,10 @@ leni <- function(
       target_fx <- "quadratic"
     }
   }
+  if(is.null(target_fx)){stop(tidymessage('Please specify target function
+                                          (i.e., "quadratic" or "cubic").'))}
 
-  # Identify Model Type - old
+  # Obtain Model Estimates
   fixed_effects <- leni_fixed_effects(model = model,
                                       model.class = model.class,
                                       ...)
@@ -52,7 +65,7 @@ leni <- function(
                                              moderator = modx,
                                              ...)
   }
-  if(model.type == "lme"){
+  if(model.class == "lme"){
     leni_random_effects(model = model, ...)
   }
 }

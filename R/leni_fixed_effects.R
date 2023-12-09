@@ -1,6 +1,11 @@
 leni_fixed_effects <- function(
     model = NULL,
-    model.class = NULL,
+    target_fx = "quadratic",
+    theta = c("a0","ax","ay"),
+    bootstrap = FALSE,
+    model.class = "lme",
+    data = NULL,
+    coef.idx = NULL,
     ...
 ){
 
@@ -22,7 +27,7 @@ leni_fixed_effects <- function(
       f_bn = expression(-3 * b3 * sqrt((b2^2 - 3 * b3 * b1) / (9 * b3^2))^2)
     )
   }
-  expr <- expr[paste0("f_", theta)]
+  expr <- expr[paste0("f_", tolower(theta))]
 
   # Save Out Relevant Parameter Estimates
   read.coefs <- if(model.class == "lm"){
@@ -33,81 +38,90 @@ leni_fixed_effects <- function(
 
   # Run bootstrap
   if(is.numeric(bootstrap) & bootstrap > 0){
-    results <- boot::boot(
-      data = if(model.class == "lm"){dat
-             } else {dat |> dplyr::group_nest(names(model@flist))},
-      statistic = if(model.class == "lm"){lm_fixed_effects_bootstrap
-                  } else {lme_fixed_effects_bootstrap},
+    if(!is.null(bootSeed)){set.seed(bootSeed)}
+    bootResults <- boot::boot(
+      data = if (model.class == "lm"){
+               data
+             } else {
+               data |> dplyr::group_nest(names(model@flist))
+             },
+      statistic = if (model.class == "lm"){
+                    lm_fixed_effects_bootstrap
+                  } else {
+                    lme_fixed_effects_bootstrap
+                  },
       R = bootstrap,
-      model.obj = model)
-  } else {
-    invisible(
-      mapply(assign,
-             paste0("b",0:(length(read.coefs(model))-1)),
-             read.coefs(model),
-             MoreArgs = list(envir = parent.frame()))
+      model = model,
+      ...)
+
+    return(
+      list(
+        fixed_effects = bootResults$t0,
+        fixed_effects_se = apply(bootResults$t,
+                                 2,
+                                 function(x) sd(x, na.rm = TRUE)),
+        fixed_effects_robust = apply(bootResults$t,
+                                     2,
+                                     function(x)
+                                       bayestestR::map_estimate(
+                                         na.omit(x))
+                                     ),
+        fixed_effects_se_robust = apply(bootResults$t,
+                                        2,
+                                        function(x) IQR(x, na.rm = TRUE)),
+        bootstrap_samples = bootResults
+      )
     )
-    nl_theta <- sapply(expr, eval)
-    point_estimates <- setNames(nl_theta,
-                                substr(names(nl_theta),
-                                       3,
-                                       nchar(names(nl_theta))))
+  } else {
+    if (grepl(target_fx, "quadratic")){
+      c(b0,b1,b2) %tin% read.coefs(model)[1:3]
+    } else if (grepl(target_fx, "cubic")){
+      c(b0,b1,b2,b3) %tin% read.coefs(model)[1:4]
+    }
+    nl_theta <- sapply(expr, eval, envir = environment())
+
     J <- matrix(c(
       sapply(expr, function(x){
         sapply(paste0("b",0:(length(read.coefs(model))-1)),
                function(y){eval(D(x,y))})})
       ), nrow = length(read.coefs(model)), ncol = length(read.coefs(model)),
       byrow = FALSE)
-    ACOV_theta <- t(J) %*% vcov(model) %*% J
 
+    return(
+      list(
+        fixed_effects = setNames(nl_theta,
+                                 substr(names(nl_theta),
+                                        3,
+                                        nchar(names(nl_theta)))),
+        fixed_effects_se = sqrt(diag(t(J) %*% vcov(model) %*% J)),
+        ACOV_theta = t(J) %*% vcov(model) %*% J
+      )
+    )
   }
 }
 
-bootstrapCall <- function(call = NULL){
-  call_str <- call |> deparse1(width.cutoff = 500, collapse = "")
-  if(grepl("data.*=.*?,", call_str)){
-    return(
-      call_str |>
-        gsub("data.*=.*?,",
-             "data = dat[indices,] |> tidyr::unnest(cols=c(data)),",
-             x = _) |>
-        str2lang()
-    )
-  } else {
-    return(
-      call_str |>
-        sub(",.*?,",
-            ", data = dat[indices,] |> tidyr::unnest(cols=c(data)),",
-            x = _) |>
-        str2lang()
 
-    )
-  }
-} # need to figure out something about getting package calls (e.g., lmerTest::lmer) (maybe another function to assign main function out of the relevant package)
-# add in functionality for glmmTMB package
+lm_fixed_effects_bootstrap <- function(data, indices, model, ...){
+  d <- data[indices,]
+  fit <- update(model, data = d)
 
-lm_fixed_effects_bootstrap <- function(data, indices, model.obj){
-  fit <- eval(boostrapCall(getCall(model.obj)))
-  invisible(
-    mapply(assign,
-         paste0("b",0:(length(read.coefs(fit))-1)),
-         read.coefs(fit),
-         MoreArgs = list(envir = parent.frame()))
-  )
-  nl_theta <- sapply(expr, eval)
+  c(b0,b1,b2) %tin% read.coefs(fit)[1:3]
+  if(grepl(target_fx, "cubic")){b3 <- read.coefs(fit)[4]}
+
+  nl_theta <- sapply(expr, eval, envir = environment())
   return(
     setNames(nl_theta, substr(names(nl_theta), 3, nchar(names(nl_theta))))
   )
 }
-lme_fixed_effects_bootstrap <- function(data, indices, model.obj){
-  fit <- eval(boostrapCall(getCall(model.obj)))
-  invisible(
-    mapply(assign,
-           paste0("b",0:(length(read.coefs(fit))-1)),
-           read.coefs(fit),
-           MoreArgs = list(envir = parent.frame()))
-  )
-  nl_theta <- sapply(expr, eval)
+
+lme_fixed_effects_bootstrap <- function(data, indices, model, ...){
+  d <- data[indices,]
+  fit <- update(model, data = d |> tidyr::unnest(cols=c(data)))
+
+  c(b0,b1,b2) %tin% read.coefs(fit)[1:3]
+  if(grepl(target_fx, "cubic")){b3 <- read.coefs(fit)[4]}
+
+  nl_theta <- sapply(expr, eval, envir = environment())
   return(
     setNames(nl_theta, substr(names(nl_theta), 3, nchar(names(nl_theta))))
   )
