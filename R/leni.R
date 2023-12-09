@@ -18,6 +18,7 @@ leni <- function(
   # Generate Output Structure
   output <- list()
   output[['function_call']] <- as.list(sys.frame(which = 1))
+  output[['function_call']][['model']] <- NULL
   output[['linear_model']] <- model
 
   # Default Arguments
