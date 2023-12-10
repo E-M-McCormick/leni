@@ -18,8 +18,8 @@ structural equation models (main function: `leni_sem()`) which generates
 
 ## Installation
 
-Set up for (CRAN)\[https://CRAN.R-project.org/\] installation of `leni`
-is underway.
+Set up for [CRAN](https://CRAN.R-project.org/) installation of `leni` is
+underway.
 
 In the meantime, to install the latest development version, you can
 install `leni` directly from github using the `devtools` package.
@@ -57,7 +57,16 @@ leni_fit <- leni(model, target_fx = "quadratic", theta = c("a0","ax","ay"),
 To generate `lavaan` syntax, users can either use predefined functions
 like the quadratic in [Cudeck & du Toit (2002)]() or cubic from
 [McCormick (2023)]() using the code below, or input their own custom
-target function with a list of parameters in `theta`.
+target function with a list of parameters in `theta` (see in second
+example).
+
+### Pre-defined Target Functions
+
+The syntax below generates syntax pre-defined nonlinear functions for
+quadratic and cubic polynomials. Note that the user can control the
+number of time points with the `number_obs` and `spacing` arguments.
+Note that for uneven spacing, include a vector of time between adjacent
+observations.
 
 ``` r
 quadratic_syntax <- leni_sem(target_fx = "quadratic", number_obs = 5, spacing = 2)
@@ -66,7 +75,8 @@ cubic_syntax <- leni_sem(target_fx = "cubic_betaN", spacing = c(1,2,4,6,10))
 ```
 
 Using the `verbose = TRUE` argument will output display-friendly syntax
-if users wish to copy it out for their own code.
+if users wish to copy it out for their own code. Output for the cubic
+example can be seen below.
 
     # Define Factors
 
@@ -89,7 +99,7 @@ if users wish to copy it out for their own code.
     betaN ~~ yN; 
     d ~~ d; 
     betaN ~~ d; 
-    betaN ~~ betaN
+    betaN ~~ betaN;
 
     # Define Phantoms
 
@@ -150,6 +160,87 @@ if users wish to copy it out for their own code.
     betaN.8 == -(d_m/3 * (((7.000000 - xN_m)/d_m)^3 - 3 * ((7.000000 - xN_m)/d_m)));
     betaN.14 == -(d_m/3 * (((13.000000 - xN_m)/d_m)^3 - 3 * ((13.000000 - xN_m)/d_m)));
     betaN.24 == -(d_m/3 * (((23.000000 - xN_m)/d_m)^3 - 3 * ((23.000000 - xN_m)/d_m)));
+
+### Custom Target Function
+
+Users can also specify their own target function by defining a custom
+equation, and specifying a vector of parameters in `theta`. Users can
+also control the outcome variable name (`y.name`) as well as the name of
+the variable representing time (`time.name`). **Note** The choice of
+`time.name` cannot be a substring of any element in `theta` - for
+example below `time.name = "ti"` is allowed, but `time.name = "t"` would
+not be.
+
+``` r
+custom_fx <- "th1 - (th1 - th2) * exp(-th3 * (ti - 1))"
+
+syntax <- leni_sem(target_fx = custom_fx, theta = c("th1", "th2", "th3"),
+                   number_obs = 5, spacing = 1.5, y.name = "RT", time.name = "ti",
+                   verbose = TRUE)
+```
+
+    # Define Factors
+
+    th1 =~ th1.1*RT1 + th1.2.5*RT2.5 + th1.4*RT4 + th1.5.5*RT5.5 + th1.7*RT7;
+    th2 =~ th2.1*RT1 + th2.2.5*RT2.5 + th2.4*RT4 + th2.5.5*RT5.5 + th2.7*RT7;
+    th3 =~ th3.1*RT1 + th3.2.5*RT2.5 + th3.4*RT4 + th3.5.5*RT5.5 + th3.7*RT7;
+
+    th1 ~ 0*1;
+    th2 ~ 0*1;
+    th3 ~ 0*1;
+
+    th1 ~~ th1; 
+    th2 ~~ th1; 
+    th3 ~~ th1; 
+    th2 ~~ th2; 
+    th3 ~~ th2; 
+    th3 ~~ th3;
+
+    # Define Phantoms
+
+    th1_ph =~ 0; th1_ph ~ NA*1 + label("th1_m")*1 + 0?1;
+    th2_ph =~ 0; th2_ph ~ NA*1 + label("th2_m")*1 + 0?1;
+    th3_ph =~ 0; th3_ph ~ NA*1 + label("th3_m")*1 + 0?1;
+
+    # Define Items
+
+    RT1 ~ nu.1*1;
+    RT2.5 ~ nu.2.5*1;
+    RT4 ~ nu.4*1;
+    RT5.5 ~ nu.5.5*1;
+    RT7 ~ nu.7*1;
+
+    RT1 ~~ epsilon.1*RT1;
+    RT2.5 ~~ epsilon.2.5*RT2.5;
+    RT4 ~~ epsilon.4*RT4;
+    RT5.5 ~~ epsilon.5.5*RT5.5;
+    RT7 ~~ epsilon.7*RT7;
+
+    # Define Constraints
+
+    nu.1 == th1_m - (th1_m - th2_m) * exp(-th3_m * (0 - 1));
+    nu.2.5 == th1_m - (th1_m - th2_m) * exp(-th3_m * (1.5 - 1));
+    nu.4 == th1_m - (th1_m - th2_m) * exp(-th3_m * (3 - 1));
+    nu.5.5 == th1_m - (th1_m - th2_m) * exp(-th3_m * (4.5 - 1));
+    nu.7 == th1_m - (th1_m - th2_m) * exp(-th3_m * (6 - 1));
+
+    th1.1 == 1 - exp(-th3_m * (0 - 1));
+    th1.2.5 == 1 - exp(-th3_m * (1.5 - 1));
+    th1.4 == 1 - exp(-th3_m * (3 - 1));
+    th1.5.5 == 1 - exp(-th3_m * (4.5 - 1));
+    th1.7 == 1 - exp(-th3_m * (6 - 1));
+
+    th2.1 == exp(-th3_m * (0 - 1));
+    th2.2.5 == exp(-th3_m * (1.5 - 1));
+    th2.4 == exp(-th3_m * (3 - 1));
+    th2.5.5 == exp(-th3_m * (4.5 - 1));
+    th2.7 == exp(-th3_m * (6 - 1));
+
+    th3.1 == (th1_m - th2_m) * (exp(-th3_m * (0 - 1)) * (0 - 1));
+    th3.2.5 == (th1_m - th2_m) * (exp(-th3_m * (1.5 - 1)) * (1.5 - 1));
+    th3.4 == (th1_m - th2_m) * (exp(-th3_m * (3 - 1)) * (3 - 1));
+    th3.5.5 == (th1_m - th2_m) * (exp(-th3_m * (4.5 - 1)) * (4.5 - 1));
+    th3.7 == (th1_m - th2_m) * (exp(-th3_m * (6 - 1)) * (6 - 1));
 
 ------------------------------------------------------------------------
 
