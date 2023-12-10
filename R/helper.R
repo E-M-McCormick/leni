@@ -24,7 +24,7 @@ citations <- list(
   Mcc_2023 = 'McCormick (2023).
   Deriving models of change with interpretable parameters:
   linear estimation with nonlinear inference. PsyArixv.
-  https://doi.org'
+  https://doi.org/10.31234/osf.io/r4vxb'
 )
 
 nonlinear_function_library <- function(target_fx = NULL, theta = NULL,
