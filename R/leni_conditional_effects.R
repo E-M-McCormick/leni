@@ -64,7 +64,9 @@ leni_conditional_effects <- function(
 
   # Save Out Relevant Parameter Estimates
   if(grepl(model.class,"lm")){
-    crit.val <- nrow(model$model)
+    crit.val <- stats::qt((1 - ci) / 2,
+                          df = nrow(model$model),
+                          lower.tail = FALSE)
   } else if(grepl(model.class,"lme")){
     crit.val <- stats::qt((1 - ci) / 2,
                    df = length(unique(leni_realdata@flist[[1]])),

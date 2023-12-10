@@ -35,7 +35,9 @@ leni_fixed_effects <- function(
   }
   expr <- expr[paste0("f_", tolower(theta))]
   if (model.class == "lm"){
-    crit.val <- nrow(model$model)
+    crit.val <- stats::qt((1 - ci) / 2,
+                          df = nrow(model$model),
+                          lower.tail = FALSE)
   } else if (model.class == "lme"){
     crit.val <- stats::qt((1 - ci) / 2,
                    df = length(unique(model@flist[[1]])),
