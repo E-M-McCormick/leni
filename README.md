@@ -6,6 +6,10 @@
 [Ethan M. McCormick](https://e-m-mccormick.github.io/) \| Department of
 Methodology & Statistics \| Leiden University
 
+**Paper Citation**: McCormick (2023). Deriving models of change with
+interpretable parameters: linear estimation with nonlinear inference.
+*PsyArixv*. https://doi.org/10.31234/osf.io/r4vxb
+
 The `leni` package provides a collection of tools for Linear Estimation
 with Nonlinear Inference (LENI) which involves estimating the parameters
 of nonlinear target functions as transformations of linear models.
