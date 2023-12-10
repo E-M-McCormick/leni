@@ -168,7 +168,7 @@ Users can also specify their own target function by defining a custom
 equation, and specifying a vector of parameters in `theta`. Users can
 also control the outcome variable name (`y.name`) as well as the name of
 the variable representing time (`time.name`). **Note** The choice of
-`time.name` cannot be a substring of any element in `theta` - for
+`time.name` cannot be a sub-string of any element in `theta` - for
 example below `time.name = "ti"` is allowed, but `time.name = "t"` would
 not be.
 
@@ -250,4 +250,4 @@ syntax <- leni_sem(target_fx = custom_fx, theta = c("th1", "th2", "th3"),
 **Text and figures:** All text and images are licensed under Creative
 Commons ([CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/))
 
-<!-- **Code:** All code is licensed under the [MIT License](LICENSE.md). -->
+**Code:** All code is licensed under the [GPL-3](LICENSE.md).
