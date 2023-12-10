@@ -20,6 +20,8 @@ Year <- 2023
 
 **Paper Citation**: McCormick (2023). Deriving models of change with interpretable parameters: linear estimation with nonlinear inference. *PsyArixv*. https://doi.org/10.31234/osf.io/r4vxb
 
+![](hex-leni.png){fig-align="center" fig-pos="h" width="20%"}
+
 The `leni` package provides a collection of tools for Linear Estimation with Nonlinear Inference (LENI) which involves
 	estimating the parameters of nonlinear target functions as transformations of linear models. 
 	Includes support for regression and mixed-effects models (main function: `leni()`) which produces 

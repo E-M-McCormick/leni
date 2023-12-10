@@ -10,6 +10,9 @@ Methodology & Statistics \| Leiden University
 interpretable parameters: linear estimation with nonlinear inference.
 *PsyArixv*. https://doi.org/10.31234/osf.io/r4vxb
 
+<img src="hex-leni.png" style="width:20.0%" data-fig-align="center"
+data-fig-pos="h" />
+
 The `leni` package provides a collection of tools for Linear Estimation
 with Nonlinear Inference (LENI) which involves estimating the parameters
 of nonlinear target functions as transformations of linear models.
