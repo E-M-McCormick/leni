@@ -1,9 +1,9 @@
 Package: leni
-Title: An R Package for Linear Estimation with Nonlinear Inference
+Title: Linear Estimation with Nonlinear Inference
 Version: 0.0.0.9000
 Date: 2023-12-10
 Authors@R: 
-    person("Ethan", "McCormick", , "e.m.mccormick@fsw.leidenuniv.nl", role = c("aut", "cre"),
+    person("Ethan", "McCormick", email = "e.m.mccormick@fsw.leidenuniv.nl", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7919-4340"))
 Maintainer: Ethan McCormick <e.m.mccormick@fsw.leidenuniv.nl>
 Description: Collection of tools for Linear Estimation with Nonlinear Inference (LENI) which involves
@@ -11,16 +11,19 @@ Description: Collection of tools for Linear Estimation with Nonlinear Inference 
 	Includes support for regression and mixed-effects models (main function: leni()) which produces 
 	transformed parameter estimates, as well as structural equation models (main function: leni_sem()) 
 	which generates 'lavaan' syntax for fitting linearized SEMs.
-License: GPL-3
+License: GPL (>= 3)
 Imports:
-	stats,
+	bayestestR,
 	boot,
+	dplyr,
 	lme4,
 	nlme,
+	stats,	
 	stringi,
-	tidyr,
-	dplyr,
-	bayestestR
+	tidyr	
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

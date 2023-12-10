@@ -36,7 +36,8 @@ install_github("e-m-mcormick/leni")
 ## Questions
 
 For questions, answers, and updates on the status of the `leni` package,
-please email EMM.
+please email EMM (available through
+[website](https://e-m-mccormick.github.io/)).
 
 ------------------------------------------------------------------------
 

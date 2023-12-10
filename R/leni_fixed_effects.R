@@ -1,3 +1,8 @@
+#' @name leni_fixed_effects
+#' @inherit leni
+#' @keywords internal
+#' @noRd
+
 leni_fixed_effects <- function(
     model = NULL,
     target_fx = "quadratic",

@@ -1,3 +1,8 @@
+#' @name leni_random_effects
+#' @inherit leni
+#' @keywords internal
+#' @noRd
+
 leni_random_effects <- function(
     model = NULL,
     target_fx = "quadratic",

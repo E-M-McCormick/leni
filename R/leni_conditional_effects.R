@@ -1,3 +1,8 @@
+#' @name leni_conditional_effects
+#' @inherit leni
+#' @keywords internal
+#' @noRd
+
 leni_conditional_effects <- function(
     model = NULL,
     target_fx = "quadratic",

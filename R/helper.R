@@ -1,3 +1,6 @@
+#' @keywords internal
+#' @noRd
+
 # Helper Functions
 `%tin%` <- function(x, y) {
   mapply(assign, as.character(substitute(x)[-1]), y,
