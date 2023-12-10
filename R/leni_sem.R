@@ -20,9 +20,9 @@ leni_sem <- function(
                       variable name.'))}
 
   # Define Time Points
-  t <- if(length(spacing == 1)){
+  t <- if(length(spacing) == 1){
     seq(1, (spacing*number_obs), by = spacing)
-  } else if(length(spacing > 1)) {
+  } else if(length(spacing) > 1) {
     c(1, 1 + cumsum(spacing))
   }
 
