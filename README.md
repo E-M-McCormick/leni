@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.qmd. Please edit that file -->
 
-# leni: Linear Estimation with Nonlinear Inference
+# leni: Linear Estimation with Nonlinear Inference <img src='hex-leni.png' align="right" height="139" />
 
 [Ethan M. McCormick](https://e-m-mccormick.github.io/) \| Department of
 Methodology & Statistics \| Leiden University
@@ -9,9 +9,6 @@ Methodology & Statistics \| Leiden University
 **Paper Citation**: McCormick (2023). Deriving models of change with
 interpretable parameters: linear estimation with nonlinear inference.
 *PsyArixv*. https://doi.org/10.31234/osf.io/r4vxb
-
-<img src="hex-leni.png" style="width:20.0%" data-fig-align="center"
-data-fig-pos="h" />
 
 The `leni` package provides a collection of tools for Linear Estimation
 with Nonlinear Inference (LENI) which involves estimating the parameters
