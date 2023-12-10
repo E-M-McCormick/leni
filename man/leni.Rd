@@ -3,7 +3,7 @@
 \name{leni}
 \alias{leni}
 \alias{LENI}
-\title{Linear Estimation with Nonlinear Inference}
+\title{Linear Estimation with Nonlinear Inference for Regression and Mixed-Effects (Multilevel) Models}
 \usage{
 leni(
   model = NULL,
@@ -58,11 +58,15 @@ Only for \code{model.class = "lme"}.}
 bootstrap procedure (e.g., \code{sim = "parametric"}).}
 }
 \description{
-Collection of tools for estimating the parameters of nonlinear
-target functions as transformations of linear models. #' Includes support
-for regression and mixed-effects models (main function: leni()) which
-produces transformed parameter estimates, as well as structural
-equation models (main function: leni_sem()) which generates {lavaan}
-syntax for fitting linearized SEMs.
+Read in linear regression or mixed-effects (multilevel) model
+output and generate nonlinear parameter estimates (and standard errors)
+through a series of transformations. Analytic and bootstrap estimates
+possible. Both main effects and interactions can be transformed. Addition
+options can be passed to the bootstrap procedure.
 }
-\keyword{package}
+\examples{
+\dontrun{
+leni_fit <- leni(model, target_fx = "quadratic", theta = c("a0","ax","ay"),
+                 model.class = "lme", bootstrap = FALSE)}
+
+}

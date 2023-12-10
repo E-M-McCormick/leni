@@ -1,3 +1,50 @@
+#' @name leni_sem
+#' @title Generate Linearized Structural Equation Model Syntax for Lavaan
+#' @description Read in linear regression or mixed-effects (multilevel) model
+#' output and generate nonlinear parameter estimates (and standard errors)
+#' through a series of transformations. Analytic and bootstrap estimates
+#' possible. Both main effects and interactions can be transformed. Addition
+#' options can be passed to the bootstrap procedure.
+#'
+#' @param target_fx The target function. Can either be a predefined function
+#' from the \code{nonlinear_function_library}, or a string defining a custom
+#' function.
+#'
+#' @param theta Vector of parameter names for the target function. Populated
+#' automatically for predefined functions, but required for custom functions.
+#'
+#' @param start_values (Optional) Start values for the means of the nonlinear latent
+#' factors (defined as phantoms). Defaults to 0 for all factor means.
+#'
+#' @param number_obs (Integer) Number of time points. Enforced through rounding.
+#'
+#' @param center_obs (Optional) Time point where time is defined as 0. Defaults
+#' to the first observation.
+#'
+#' @param spacing Amount of time between observations. If a single numeric value
+#' is provided, then defaults to equal spacing. For unequal spacing, a vector
+#' of values representing the spacing between adjacent time points should be
+#' provided. If a vector is provided, the \code{number_obs} argument is ignored.
+#'
+#' @param y.name (Optional) Provide a string indicating a custom name for the
+#' repeated measures outcome.
+#'
+#' @param time.name (Optional) Provide a string indicating a custom name for the
+#' repeated measure of time (e.g., age, wave, etc.). Cannot be a substring of
+#' an element in \code{theta}.
+#'
+#' @param verbose (Boolean) If \code{TRUE}, outputs a reader-friendly version
+#' of generated syntax into the console.
+#'
+#' @examples
+#' custom_fx <- "th1 - (th1 - th2) * exp(-th3 * (ti - 1))"
+#'
+#' syntax <- leni_sem(target_fx = custom_fx, theta = c("th1", "th2", "th3"),
+#'                    number_obs = 5, spacing = 1.5, y.name = "RT", time.name = "ti",
+#'                    verbose = TRUE)
+#'
+#' @export
+
 leni_sem <- function(
     target_fx = "cubic",
     theta = NULL,
@@ -5,9 +52,9 @@ leni_sem <- function(
     number_obs = 5,
     center_obs = 1,
     spacing = 1,
-    verbose = FALSE,
     y.name = NULL,
-    time.name = NULL
+    time.name = NULL,
+    verbose = FALSE
 ){
   # Check Initial arguments
   if(is.null(target_fx)){stop('Target function is not defined. Stopping...')}
@@ -17,6 +64,7 @@ leni_sem <- function(
                                          of at least one element in `theta`,
                                          which will cause weird results.
                                          Please alter before proceeding.')}
+  number_obs = round(number_obs, digits = 0)
 
   # Define Time Points
   t <- if(length(spacing) == 1){

@@ -32,20 +32,19 @@
 #'  with "modex" in parameter name).
 #'
 #' @param varcov Boolean, whether to include random effects variances and covariances.
-#' Only for `model.class = "lme"`.
+#' Only for \code{model.class = "lme"}.
 #'
 #' @param ci Confidence level for interval estimation (default: 95%).
 #'
 #' @param verbose Boolean, whether to display additional messages.
 #'
 #' @param ... Additional arguments. Useful for passing options to the
-#' bootstrap procedure (e.g., `sim = "parametric"`).
+#' bootstrap procedure (e.g., \code{sim = "parametric"}).
 #'
 #' @examples
+#' \dontrun{
 #' leni_fit <- leni(model, target_fx = "quadratic", theta = c("a0","ax","ay"),
-#'                  model.class = "lme", bootstrap = FALSE)
-#'
-#' @keywords package
+#'                  model.class = "lme", bootstrap = FALSE)}
 #'
 #' @export
 #'
