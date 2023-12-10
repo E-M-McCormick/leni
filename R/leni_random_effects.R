@@ -1,5 +1,4 @@
 #' @name leni_random_effects
-#' @inherit leni
 #' @keywords internal
 #' @noRd
 

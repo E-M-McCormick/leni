@@ -1,5 +1,4 @@
 #' @name leni_conditional_effects
-#' @inherit leni
 #' @keywords internal
 #' @noRd
 

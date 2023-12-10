@@ -1,5 +1,4 @@
 #' @name leni_fixed_effects
-#' @inherit leni
 #' @keywords internal
 #' @noRd
 
