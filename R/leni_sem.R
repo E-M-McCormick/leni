@@ -78,13 +78,13 @@ leni_sem <- function(
   ## Factor Loading Constraints
   lambda_constraints <- lapply(paste0(theta,"_m"), function(x){
     if(grepl("x_ti",
-             D(mean_fx, x) |>
+             stats::D(mean_fx, x) |>
              deparse1(width.cutoff = 500, collapse = ""),
              fixed = TRUE)){
       sprintf(paste0(
         substr(x, 1, nchar(x)-2),
         ".%1$d == ",
-        D(mean_fx, x) |>
+        stats::D(mean_fx, x) |>
           deparse1(width.cutoff = 500, collapse = "") |>
           gsub("x_ti","%2$f",x = _),
         ";"
@@ -93,7 +93,7 @@ leni_sem <- function(
       sprintf(paste0(
         substr(x, 1, nchar(x)-2),
         ".%1$d == ",
-        D(mean_fx, x) |>
+        stats::D(mean_fx, x) |>
           deparse1(width.cutoff = 500, collapse = ""),
         ";"
       ), t) |> paste(collapse = "\n")

@@ -1,3 +1,27 @@
+#' @name leni
+#' @aliases LENI
+#' @title Linear Estimation with Nonlinear Inference
+#' @description Collection of tools for estimating the parameters of nonlinear
+#' target functions as transformations of linear models. #' Includes support
+#' for regression and mixed-effects models (main function: leni()) which
+#' produces transformed parameter estimates, as well as structural
+#' equation models (main function: leni_sem()) which generates {lavaan}
+#' syntax for fitting linearized SEMs.
+#' @model: The linear model object.
+#' @target_fx: The target function, either "quadratic" or "cubic."
+#' @theta: Vector of parameter names for the target function. For quadratic choose three of: "a0", "ax", "ay", "g", "ac". For cubic, choose four of: "xn", "yn", "d", "h", "bn".
+#' @bootstrap: Boolean or numeric, indicating whether to perform bootstrap estimation (default: FALSE; TRUE default: 5000 bootstrap samples).
+#' @bootSeed: Seed for bootstrap sampling.
+#' @model.class: The class of the linear model ("lm" or "lme").
+#' @data: Raw data required for bootstrap results.
+#' @coef.idx: Coefficient indices for fixed effects (default: 1:3 or 1:4).
+#' @modx: Moderator variable for conditional effects.
+#' @modx.idx: Moderator indices (default: first three/four coeffecients with "modex" in parameter name).
+#' @varcov: Boolean, whether to include random effects variances and covariances. Only for `model.class = "lme"`.
+#' @ci: Confidence level for interval estimation (default: 95%).
+#' @verbose: Boolean, whether to display additional messages.
+#' @...: Additional arguments. Useful for passing options to the bootstrap procedure (e.g., `sim = "parametric"`).
+
 leni <- function(
     model = NULL,
     target_fx = "quadratic",

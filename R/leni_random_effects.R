@@ -31,10 +31,10 @@ leni_random_effects <- function(
   }
   expr <- expr[paste0("f_", tolower(theta))]
   if (model.class == "lm"){
-    crit.val <- NULL                              # FIX ME
+    crit.val <- nrow(model$model)
   } else if (model.class == "lme"){
-    crit.val <- qt((1 - ci) / 2,
-                   df = length(unique(leni_realdata@flist[[1]])),
+    crit.val <- stats::qt((1 - ci) / 2,
+                   df = length(unique(model@flist[[1]])),
                    lower.tail = FALSE)
   }
 
@@ -54,7 +54,7 @@ leni_random_effects <- function(
   J <- matrix(c(
     sapply(expr, function(x){
       sapply(paste0("b",0:(length(coef.idx)-1)),
-             function(y){eval(D(x,y))})})
+             function(y){eval(stats::D(x,y))})})
   ), nrow = length(coef.idx),
   ncol = length(coef.idx),
   byrow = FALSE)
@@ -87,23 +87,23 @@ leni_random_effects <- function(
         random_effects = data.frame(
           row.names = cov_theta_names,
           boot.est = apply(bootResults$t, 2, function(x) mean(x, na.rm = TRUE)),
-          boot.se = apply(bootResults$t, 2, function(x) sd(x, na.rm = TRUE)),
+          boot.se = apply(bootResults$t, 2, function(x) stats::sd(x, na.rm = TRUE)),
           boot.ci.lower = tryCatch(
             expr = {sapply(1:ncol(bootResults$t), function(x){boot::boot.ci(bootResults, type = "bca", index = x)$bca[4]})},
             error = function(e){apply(bootResults$t, 2, function(x) mean(x, na.rm = TRUE)) -
-                crit.val*apply(bootResults$t, 2, function(x) sd(x, na.rm = TRUE))}
+                crit.val*apply(bootResults$t, 2, function(x) stats::sd(x, na.rm = TRUE))}
           ),
           boot.ci.upper = tryCatch(
             expr = {sapply(1:ncol(bootResults$t),function(x){boot::boot.ci(bootResults, type = "bca", index = x)$bca[5]})},
             error = function(e){
               apply(bootResults$t, 2, function(x) mean(x, na.rm = TRUE)) +
-                crit.val*apply(bootResults$t, 2, function(x) sd(x, na.rm = TRUE))}
+                crit.val*apply(bootResults$t, 2, function(x) stats::sd(x, na.rm = TRUE))}
           ),
           boot.est.robust = apply(bootResults$t, 2, function(x){
-            if (sd(x, na.rm = TRUE) > 0) bayestestR::map_estimate(na.omit(x))
+            if (stats::sd(x, na.rm = TRUE) > 0) bayestestR::map_estimate(stats::na.omit(x))
             else mean(x, na.rm = TRUE)
           }),
-          boot.se.robust = apply(bootResults$t, 2, function(x) IQR(x, na.rm = TRUE))
+          boot.se.robust = apply(bootResults$t, 2, function(x) stats::IQR(x, na.rm = TRUE))
         ),
         bootstrap_samples = bootResults
       )
@@ -118,14 +118,14 @@ leni_random_effects <- function(
 
 random_effects_bootstrap <- function(data, indices, model,
                                      model.class, target_fx, expr, coef.idx){
-  fit <- update(model, data = data[indices,] |> tidyr::unnest(cols=c(data)))
+  fit <- stats::update(model, data = data[indices,] |> tidyr::unnest(cols=c(data)))
 
   c(b0,b1,b2) %tin% lme4::fixef(fit)[1:3]
   if(grepl(target_fx, "cubic")){b3 <- lme4::fixef(fit)[4]}
   J <- matrix(c(
     sapply(expr, function(x){
       sapply(paste0("b",0:(length(coef.idx)-1)),
-             function(y){eval(D(x,y))})})
+             function(y){eval(stats::D(x,y))})})
   ),
   nrow = length(coef.idx),
   ncol = length(coef.idx),

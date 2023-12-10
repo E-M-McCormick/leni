@@ -12,11 +12,11 @@ tidymessage <- function(..., prefix = " ", initial = ""){
 citations <- list(
   CdT_2002 = 'Cudeck, R., & Du Toit, S. H. C. (2002).
   A version of quadratic regression with interpretable parameters.
-  Multivariate Behavioral Research, 37(4), 501–519.',
+  Multivariate Behavioral Research, 37(4), 501-519.',
   Mcc_2023 = 'McCormick (2023).
   Deriving models of change with interpretable parameters:
   linear estimation with nonlinear inference. PsyArixv.
-  htts://doi.org'
+  https://doi.org'
 )
 
 nonlinear_function_library <- function(target_fx = NULL, theta = NULL,
