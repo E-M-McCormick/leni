@@ -130,7 +130,7 @@ fixed_effects_bootstrap <- function(data, indices, model,
     fit <- stats::update(model, data = data[indices,] |> tidyr::unnest(cols = c(data)))
   }
 
-  c(b0,b1,b2) %tin% read.coefs(fit)[coef.idx]
+  c(b0,b1,b2) %tin% read.coefs(fit)[coef.idx[1:3]]
   if(grepl(target_fx, "cubic")){b3 <- read.coefs(fit)[coef.idx[4]]}
 
   nl_theta <- sapply(expr, eval, envir = environment())
