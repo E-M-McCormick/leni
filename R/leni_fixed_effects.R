@@ -80,7 +80,7 @@ leni_fixed_effects <- function(
             if (stats::sd(x, na.rm = TRUE) > 0) bayestestR::map_estimate(stats::na.omit(x))
             else mean(x, na.rm = TRUE)
           }),
-          se.robust = apply(bootResults$t, 2, function(x) stats::IQR(x, na.rm = TRUE))
+          se.robust = apply(bootResults$t, 2, function(x) trim_sd(x, na.rm = TRUE))
         ),
         bootstrap_samples = bootResults
       )

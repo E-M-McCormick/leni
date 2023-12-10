@@ -12,6 +12,11 @@ tidymessage <- function(..., prefix = " ", initial = ""){
   message(strwrap(..., prefix = prefix, initial = initial))
 }
 
+trim_sd <- function(x, na.rm = FALSE){
+  q <- stats::quantile(x, probs = c(0.05, 0.95))
+  return(sd(x[x > q[1] & x < q[2]], na.rm = na.rm))
+}
+
 citations <- list(
   CdT_2002 = 'Cudeck, R., & Du Toit, S. H. C. (2002).
   A version of quadratic regression with interpretable parameters.
