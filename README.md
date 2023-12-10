@@ -43,11 +43,10 @@ please email EMM.
 ## Examples
 
 To perform LENI on an `lm` model or a model of class `lme` (currently
-support models from
-(`lme4`)\[https://cran.r-project.org/web/packages/lme4/index.html\],
-(`lmerTest`)\[https://cran.r-project.org/web/packages/lmerTest/index.html\],
-and
-(`nlme`)\[https://cran.r-project.org/web/packages/nlme/index.html\]),
+supports models from
+[`lme4`](https://cran.r-project.org/web/packages/lme4/index.html),
+[`lmerTest`](https://cran.r-project.org/web/packages/lmerTest/index.html),
+and [`nlme`](https://cran.r-project.org/web/packages/nlme/index.html)),
 use the `leni()` function.
 
 ``` r
@@ -55,9 +54,10 @@ leni_fit <- leni(model, target_fx = "quadratic", theta = c("a0","ax","ay"),
                  model.class = "lme", bootstrap = FALSE)
 ```
 
-To generate `lavaan` syntax, we can either use predefined functions like
-the quadratic in [Cudeck & du Toit (2002)]() or cubic from [McCormick
-(2023)]() using the code below.
+To generate `lavaan` syntax, users can either use predefined functions
+like the quadratic in [Cudeck & du Toit (2002)]() or cubic from
+[McCormick (2023)]() using the code below, or input their own custom
+target function with a list of parameters in `theta`.
 
 ``` r
 quadratic_syntax <- leni_sem(target_fx = "quadratic", number_obs = 5, spacing = 2)
