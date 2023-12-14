@@ -43,7 +43,7 @@ In the meantime, to install the latest development version, you can install `len
 #install.packages("devtools")
 library(devtools)
 
-install_github("e-m-mcormick/leni")
+install_github("E-M-McCormick/leni")
 ```
 
 ---

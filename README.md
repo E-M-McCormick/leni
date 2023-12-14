@@ -32,7 +32,7 @@ install `leni` directly from github using the `devtools` package.
 #install.packages("devtools")
 library(devtools)
 
-install_github("e-m-mcormick/leni")
+install_github("E-M-McCormick/leni")
 ```
 
 ------------------------------------------------------------------------
