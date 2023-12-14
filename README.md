@@ -65,6 +65,10 @@ like the quadratic in [Cudeck & du Toit (2002)]() or cubic from
 target function with a list of parameters in `theta` (see in second
 example).
 
+**For `leni_sem`, you must use `lavaan()` rather than `growth()`,
+otherwise the nonlinear models are unlikely to fit due to the defaults
+in `growth()`.**
+
 ### Pre-defined Target Functions
 
 The syntax below generates syntax pre-defined nonlinear functions for
@@ -74,7 +78,8 @@ Note that for uneven spacing, include a vector of time between adjacent
 observations.
 
 ``` r
-quadratic_syntax <- leni_sem(target_fx = "quadratic", number_obs = 5, spacing = 2)
+quadratic_syntax <- leni_sem(target_fx = "quadratic", number_obs = 5, 
+                             spacing = 2, homoscedastic = TRUE)
 
 cubic_syntax <- leni_sem(target_fx = "cubic_betaN", spacing = c(1,2,4,6,10))
 ```

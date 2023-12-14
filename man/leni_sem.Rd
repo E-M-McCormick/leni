@@ -13,6 +13,7 @@ leni_sem(
   spacing = 1,
   y.name = NULL,
   time.name = NULL,
+  homoscedastic = FALSE,
   verbose = FALSE
 )
 }
@@ -43,6 +44,9 @@ repeated measures outcome.}
 \item{time.name}{(Optional) Provide a string indicating a custom name for the
 repeated measure of time (e.g., age, wave, etc.). Cannot be a substring of
 an element in \code{theta}.}
+
+\item{homoscedastic}{(Boolean) If TRUE, set all item residual variances equal.
+Otherwise, estimate each residual uniquely.}
 
 \item{verbose}{(Boolean) If \code{TRUE}, outputs a reader-friendly version
 of generated syntax into the console.}

@@ -33,6 +33,9 @@
 #' repeated measure of time (e.g., age, wave, etc.). Cannot be a substring of
 #' an element in \code{theta}.
 #'
+#' @param homoscedastic (Boolean) If TRUE, set all item residual variances equal.
+#' Otherwise, estimate each residual uniquely.
+#'
 #' @param verbose (Boolean) If \code{TRUE}, outputs a reader-friendly version
 #' of generated syntax into the console.
 #'
@@ -54,6 +57,7 @@ leni_sem <- function(
     spacing = 1,
     y.name = NULL,
     time.name = NULL,
+    homoscedastic = FALSE,
     verbose = FALSE
 ){
   # Check Initial arguments
@@ -100,8 +104,14 @@ leni_sem <- function(
   # Define Item Intercepts and Residuals
   item_intercepts <- sprintf("%1$s%2$g ~ nu.%2$g*1;", y.name, t) |>
     paste(collapse = "\n")
-  item_residuals <- sprintf("%1$s%2$g ~~ epsilon.%2$g*%1$s%2$g;", y.name, t) |>
-    paste(collapse = "\n")
+  if(homoscedastic){
+    item_residuals <- sprintf("%1$s%2$g ~~ epsilon*%1$s%2$g;", y.name, t) |>
+      paste(collapse = "\n")
+  } else {
+    item_residuals <- sprintf("%1$s%2$g ~~ epsilon.%2$g*%1$s%2$g;", y.name, t) |>
+      paste(collapse = "\n")
+  }
+
 
   # Define Latent Factors
   define_factors <- lapply(theta, function(x){
@@ -113,11 +123,11 @@ leni_sem <- function(
     paste(collapse = "\n")
   factor_covar <- paste0(outer(theta,theta, "paste", sep = " ~~ ")[
     lower.tri(outer(theta,theta, "paste", sep = " ~~ "), diag = TRUE)
-  ] |> paste(collapse = "; \n"),";")
+  ] |> paste(collapse = ";\n"),";")
 
   ## Define Phantoms for Latent Means
   define_phantoms <- lapply(theta, function(x){
-    sprintf('%1$s_ph =~ 0; %1$s_ph ~ NA*1 + label("%1$s_m")*1 + %2$s?1;',
+    sprintf("%1$s_ph =~ 0; %1$s_ph ~ NA*1 + label('%1$s_m')*1 + %2$s?1;",
             x, start_values[x])
   }) |> paste(collapse = "\n")
 
@@ -153,11 +163,11 @@ leni_sem <- function(
   }) |> paste(collapse = "\n\n")
 
   model.syntax <-paste(
-    c("# Define Factors",define_factors, factor_means, factor_covar,
-      "# Define Phantoms", define_phantoms,
-      "# Define Items", item_intercepts, item_residuals,
-      "# Define Constraints",nu_constraints, lambda_constraints),
-    collapse = "\n\n")
+    c('# Define Factors',define_factors, factor_means, factor_covar,
+      '# Define Phantoms', define_phantoms,
+      '# Define Items', item_intercepts, item_residuals,
+      '# Define Constraints',nu_constraints, lambda_constraints),
+    collapse = '\n\n')
   if(verbose) cat(model.syntax)
   return(model.syntax)
 }

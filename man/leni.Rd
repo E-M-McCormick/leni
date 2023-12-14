@@ -11,7 +11,7 @@ leni(
   theta = c("a0", "ax", "ay"),
   bootstrap = FALSE,
   bootSeed = NULL,
-  model.class = "lme",
+  model.class = NULL,
   data = NULL,
   coef.idx = NULL,
   modx = NULL,
