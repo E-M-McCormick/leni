@@ -1,6 +1,6 @@
 Package: leni
 Title: Linear Estimation with Nonlinear Inference
-Version: 0.0.0.9000
+Version: 0.1.0
 Date: 2023-12-10
 Authors@R: 
     person("Ethan", "McCormick", email = "e.m.mccormick@fsw.leidenuniv.nl", role = c("aut", "cre"),
