@@ -69,7 +69,7 @@ leni_conditional_effects <- function(
                           lower.tail = FALSE)
   } else if(grepl(model.class,"lme")){
     crit.val <- stats::qt((1 - ci) / 2,
-                   df = length(unique(leni_realdata@flist[[1]])),
+                   df = length(unique(model@flist[[1]])),
                    lower.tail = FALSE)
   }
 
@@ -137,7 +137,7 @@ leni_conditional_effects <- function(
     return(
       list(
         fixed_effects = data.frame(
-          row.names = theta,
+          row.names = names(nl_theta),
           est = nl_theta,
           se = sqrt(diag(t(J) %*% stats::vcov(model)[c(coef.idx,modx.idx),
                                               c(coef.idx,modx.idx)] %*% J)),
